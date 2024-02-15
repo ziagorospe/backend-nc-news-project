@@ -1,9 +1,8 @@
 const db = require(`${__dirname}/../connection.js`);
+const fs = require('fs/promises');
 
 function readTopics(req){
-    if(Object.keys(req.query).length > 0){
-        return Promise.reject({status: 400, msg: 'bad request'})
-    }
+
     const queryString = `SELECT * FROM topics;`
     return db.query(queryString)
     .then((data)=>{
@@ -11,4 +10,13 @@ function readTopics(req){
     })
 }
 
-module.exports = { readTopics };
+function readEndpoints(req){
+
+    return fs.readFile(`${__dirname}/../../endpoints.json`)
+    .then((data) => {
+        const parsedData = JSON.parse(data)
+        return parsedData;
+    })
+}
+
+module.exports = { readTopics, readEndpoints };

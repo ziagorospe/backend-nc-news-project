@@ -1,4 +1,4 @@
-const { readTopics } = require(`${__dirname}/../model/model.js`)
+const { readTopics, readEndpoints } = require(`${__dirname}/../model/model.js`)
 
 function getTopics(req, res, next){
     readTopics(req)
@@ -11,4 +11,12 @@ function getTopics(req, res, next){
     .catch(next)
 }
 
-module.exports = { getTopics }
+function getEndpoints(req, res, next){
+    readEndpoints(req)
+    .then((endPoints) => {
+        res.status(200).send(endPoints);
+    })
+    .catch(next)  
+}
+
+module.exports = { getTopics, getEndpoints }
