@@ -1,3 +1,4 @@
 # Northcoders News API
 
-For instructions, please head over to [L2C NC News](https://l2c.northcoders.com/courses/be/nc-news).
+you will need to create .env.development (PGDATABASE=nc_news) and .env.test (PGDATABASE=nc_news_test) files for this to run.
+
