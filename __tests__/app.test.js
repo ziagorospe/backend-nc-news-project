@@ -46,7 +46,6 @@ describe('NC NEWS', () => {
             .expect(200)
             .then((response)=>{
                 const body = response.body
-                console.log(body)
                 expect(body).toMatchObject(endPoints)
             })
         });
