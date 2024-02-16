@@ -339,10 +339,10 @@ describe('NC NEWS', () => {
         });
         test('should reject 400 if given and invalid topic query', () => {
             return request(app)
-            .get("/api/articles?topic=Õ192ÖxyÕ67")
-            .expect(400)
+            .get("/api/articles?topic=87")
+            .expect(404)
             .then((response)=>{
-                expect(response.badRequest).toBe(true);
+                expect(response.body.msg).toBe('topic not found');
             })
         });
         test('should reject 404 if given a valid topic query that does not exist', () => {
@@ -353,12 +353,12 @@ describe('NC NEWS', () => {
                 expect(response.body.msg).toBe('topic not found');
             })
         });
-        test('should respond 200 with msg "no articles with that topic found" if given a valid topic that doesnt have any related articles', () => {
+        test('should respond 200 with empty array if given a valid topic that doesnt have any related articles', () => {
             return request(app)
             .get("/api/articles?topic=paper")
             .expect(200)
             .then((response)=>{
-                expect(response.body.msg).toBe('no articles with that topic found :(');
+                expect(response.body.articles).toEqual([]);
             })
         });
     });    

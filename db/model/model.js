@@ -47,8 +47,6 @@ function readArticles(req){
             if(data[0].rows.length === 0){
                 if(!data[1].includes(queryTopic)){
                     return Promise.reject({status: 404, msg: 'topic not found'});
-                } else {
-                    return Promise.reject({status: 200, msg: 'no articles with that topic found :('});
                 }
             }
             return data[0].rows;
