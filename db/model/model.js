@@ -213,6 +213,17 @@ function writeArticles(req){
     })
 }
 
+function removeArticleId(req){
+    const articleId = req.params.article_id;
+    return db.query(`DELETE FROM articles WHERE article_id = $1 RETURNING *;`, [articleId])
+    .then((data)=>{
+        if(data.rows.length === 0){
+            return Promise.reject({status: 404, msg: 'article not found'});
+        }
+        return data.rows;
+    })
+}
+
 function fetchValidArray(qString, prop){
     return db.query(qString)
     .then((data)=>{
@@ -224,4 +235,4 @@ function fetchValidArray(qString, prop){
     })
 }
 
-module.exports = { readTopics, readEndpoints, readArticle, readArticles, readArticleComments, writeArticleComments, addArticleVotes, removeCommentId, readComment, readUsers, readUser, addCommentVotes, writeTopics, writeArticles };
+module.exports = { readTopics, readEndpoints, readArticle, readArticles, readArticleComments, writeArticleComments, addArticleVotes, removeCommentId, readComment, readUsers, readUser, addCommentVotes, writeTopics, writeArticles, removeArticleId };

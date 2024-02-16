@@ -602,5 +602,37 @@ describe('NC NEWS', () => {
                 expect(response.body.msg).toBe('not found');
             })
         });
+    });
+    describe('DELETE /api/articles/:article_id', () => {
+        test('should respond 204 with no content and deleted all associated comments', () => {
+            return request(app)
+            .delete("/api/articles/1")
+            .expect(204)
+            .then((response)=>{
+                expect(response.body).toEqual({});
+                return db.query(`SELECT * FROM comments;`)
+            })
+            .then((response)=>{
+                for(let i=0; i<response.rows.length; i++){
+                    expect(response.rows[i].article_id).not.toBe(1);
+                }
+            })
+        });
+        test('should reject 404 valid article IDs that do not exist', () => {
+            return request(app)
+            .delete("/api/articles/9999")
+            .expect(404)
+            .then((response)=>{
+                expect(response.body.msg).toBe('article not found');
+            })
+        });
+        test('should reject 400 invalid article IDs', () => {
+            return request(app)
+            .delete("/api/articles/james")
+            .expect(400)
+            .then((response)=>{
+                expect(response.body.msg).toBe('bad request');
+            })
+        });
     });   
 });
