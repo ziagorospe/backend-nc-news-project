@@ -35,12 +35,34 @@ function readArticle(req){
 
 function readArticles(req){
     const queryTopic = req.query.topic;
+    let queryOrder = `DESC`;
+    let querySort = `articles.created_at`;
+
+    if(req.query.order){
+        if(req.query.order.toUpperCase() === 'ASC' || req.query.order.toUpperCase() === 'DESC'){
+            queryOrder = req.query.order.toUpperCase();
+        } else {
+            return Promise.reject({status: 400, msg: 'bad request, invalid order'});
+        }
+    }
+
+    if(req.query.sort){
+        const validArticleCol = ['author','title','article_id','topic','created_at','votes', 'article_img_url']
+        if(validArticleCol.includes(req.query.sort.toLowerCase())){
+            querySort = `articles.${req.query.sort.toLowerCase()}`;
+        } else if (req.query.sort.toLowerCase() === 'comment_count'){
+            querySort = req.query.sort.toLowerCase();
+        } else {
+            return Promise.reject({status: 400, msg: 'bad request, invalid sort'});
+        }
+    }
+    
     let queryString = `SELECT articles.author, articles.title, articles.article_id, articles.topic, articles.created_at, articles.votes, article_img_url, COUNT(comments.article_id)::int AS comment_count 
     FROM articles 
     LEFT JOIN comments ON articles.article_id = comments.article_id`;
     if(req.query.topic){ 
         queryString += ` WHERE topic = $1`;
-        queryString += ` GROUP BY articles.article_id ORDER BY articles.created_at DESC;`;
+        queryString += ` GROUP BY articles.article_id ORDER BY ${querySort} ${queryOrder};`;
         const fetchArticleTopicString = `SELECT slug FROM topics;`;
         return Promise.all([db.query(queryString, [queryTopic]), fetchValidArray(fetchArticleTopicString, 'slug')])
         .then((data)=>{
@@ -52,7 +74,7 @@ function readArticles(req){
             return data[0].rows;
         })
     }
-    queryString += ` GROUP BY articles.article_id ORDER BY articles.created_at DESC;`;
+    queryString += ` GROUP BY articles.article_id ORDER BY ${querySort} ${queryOrder};`;
     return db.query(queryString)
     .then((data)=>{
         return data.rows;
