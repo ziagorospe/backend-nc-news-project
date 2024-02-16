@@ -29,12 +29,28 @@ function readArticle(req){
     })
 }
 
-function readArticles(){
-    const queryString = `SELECT articles.author, articles.title, articles.article_id, articles.topic, articles.created_at, articles.votes, article_img_url, COUNT(comments.article_id)::int AS comment_count 
+function readArticles(req){
+    const queryTopic = req.query.topic;
+    let queryString = `SELECT articles.author, articles.title, articles.article_id, articles.topic, articles.created_at, articles.votes, article_img_url, COUNT(comments.article_id)::int AS comment_count 
     FROM articles 
-    LEFT JOIN comments ON articles.article_id = comments.article_id
-    GROUP BY articles.article_id
-    ORDER BY articles.created_at DESC;`;
+    LEFT JOIN comments ON articles.article_id = comments.article_id`;
+    if(req.query.topic){ 
+        queryString += ` WHERE topic = $1`;
+        queryString += ` GROUP BY articles.article_id ORDER BY articles.created_at DESC;`;
+        const fetchArticleTopicString = `SELECT slug FROM topics;`;
+        return Promise.all([db.query(queryString, [queryTopic]), fetchValidArray(fetchArticleTopicString, 'slug')])
+        .then((data)=>{
+            if(data[0].rows.length === 0){
+                if(!data[1].includes(queryTopic)){
+                    return Promise.reject({status: 404, msg: 'topic not found'});
+                } else {
+                    return Promise.reject({status: 200, msg: 'no articles with that topic found :('});
+                }
+            }
+            return data[0].rows;
+        })
+    }
+    queryString += ` GROUP BY articles.article_id ORDER BY articles.created_at DESC;`;
     return db.query(queryString)
     .then((data)=>{
         return data.rows;
@@ -44,7 +60,8 @@ function readArticles(){
 function readArticleComments(req){
     const articleId = req.params.article_id;
     const queryString = `SELECT * FROM comments WHERE comments.article_id = $1 ORDER BY comments.created_at DESC`;
-    return Promise.all([db.query(queryString, [articleId]), fetchArticleIds()])
+    const fetchArticleIdString = `SELECT articles.article_id FROM articles;`;
+    return Promise.all([db.query(queryString, [articleId]), fetchValidArray(fetchArticleIdString, 'article_id')])
     .then((data)=>{
         if(data[0].rows.length === 0){
             if(!data[1].includes(articleId*1)){
@@ -115,15 +132,14 @@ function readUsers(){
     })
 }
 
-function fetchArticleIds(){
-    const fetchArticleIdString = `SELECT articles.article_id FROM articles`;
-    return db.query(fetchArticleIdString)
+function fetchValidArray(qString, prop){
+    return db.query(qString)
     .then((data)=>{
-        const validArticleId = [];
+        const valid = [];
         for(let i=0; i<data.rows.length;i++){
-            validArticleId.push(data.rows[i].article_id);
+            valid.push(data.rows[i][prop]);
         }
-        return validArticleId;
+        return valid;
     })
 }
 
