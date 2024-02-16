@@ -1,4 +1,4 @@
-const { readTopics, readEndpoints, readArticle, readArticles, readArticleComments, writeArticleComments, addArticleVotes, removeCommentId, readComment, readUsers, readUser} = require(`${__dirname}/../model/model.js`)
+const { readTopics, readEndpoints, readArticle, readArticles, readArticleComments, writeArticleComments, addArticleVotes, removeCommentId, readComment, readUsers, readUser, addCommentVotes} = require(`${__dirname}/../model/model.js`)
 
 function getTopics(req, res, next){
     readTopics()
@@ -32,7 +32,7 @@ function getComment(req, res, next){
     .then((comment)=>{
         res.status(200).send({comment: comment});
     })
-    .catch(next)
+    .catch(next);
 }
 
 function getUsers(req, res, next){
@@ -40,7 +40,7 @@ function getUsers(req, res, next){
     .then((users)=>{
         res.status(200).send({users: users});
     })
-    .catch(next)
+    .catch(next);
 }
 
 function getUser(req, res, next){
@@ -48,7 +48,7 @@ function getUser(req, res, next){
     .then((user)=>{
         res.status(200).send({user: user});
     })
-    .catch(next)
+    .catch(next);
 }
 
 function getEndpoints(req, res, next){
@@ -72,7 +72,7 @@ function postArticleComments(req, res, next){
     .then((articleComment)=>{
         res.status(201).send({articleComment: articleComment});
     })
-    .catch(next)
+    .catch(next);
 }
 
 function patchArticleVotes(req, res, next){
@@ -80,7 +80,15 @@ function patchArticleVotes(req, res, next){
     .then((article)=>{
         res.status(200).send({article: article});
     })
-    .catch(next)
+    .catch(next);
+}
+
+function patchCommentVotes(req,res,next){
+    addCommentVotes(req)
+    .then((comment)=>{
+        res.status(200).send({comment: comment});
+    })
+    .catch(next);
 }
 
 function deleteCommentId(req, res, next){
@@ -88,7 +96,7 @@ function deleteCommentId(req, res, next){
     .then(()=>{
         res.status(204).send()
     })
-    .catch(next)
+    .catch(next);
 }
 
-module.exports = { getTopics, getArticles, getArticle, getComment, getUsers, getUser, getEndpoints, getArticleComments, postArticleComments, patchArticleVotes, deleteCommentId }
+module.exports = { getTopics, getArticles, getArticle, getComment, getUsers, getUser, getEndpoints, getArticleComments, postArticleComments, patchArticleVotes, patchCommentVotes, deleteCommentId }

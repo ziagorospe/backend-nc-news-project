@@ -460,5 +460,60 @@ describe('NC NEWS', () => {
                 expect(response.body.msg).toBe('user not found');
             })
         });
+    });
+    describe('PATCH /api/comments/:comment_id', () => {
+        test('should respond 200 with the updated comment object and the correctly updated number of votes', () => {
+            const voteObj = { inc_votes: 5 }
+            return request(app)
+            .patch('/api/comments/2')
+            .send(voteObj)
+            .then(()=>{
+                return request(app)
+                .patch('/api/comments/2')
+                .send(voteObj)
+                .expect(200)  
+            }).then((response)=>{
+                const body = response.body;
+                expect(Array.isArray(body.comment)).toBe(false);
+                expect(Object.keys(body.comment).sort()).toEqual(['body', 'article_id', 'author', 'votes', 'created_at'].sort());
+                expect(body.comment.votes).toBe(24);
+                return request(app)
+                .patch('/api/comments/2')
+                .send({inc_votes: -20})
+                .expect(200)  
+            }).then((response)=>{
+                expect(response.body.comment.votes).toBe(4);
+            })
+        });
+        test('should reject 400 invalid vote values', () => {
+            const voteObj = { inc_votes: 'hound' }
+            return request(app)
+            .patch('/api/comments/2')
+            .send(voteObj)
+            .expect(400)
+            .then((response)=>{
+                expect(response.body.msg).toBe('bad request');
+            })
+        });
+        test('should reject 400 invalid comment IDs', () => {
+            const voteObj = { inc_votes: 10 }
+            return request(app)
+            .patch('/api/comments/forklift')
+            .send(voteObj)
+            .expect(400)
+            .then((response)=>{
+                expect(response.body.msg).toBe('bad request');
+            })
+        });
+        test('should reject 404 valid comment IDs that do not exist', () => {
+            const voteObj = { inc_votes: 10 }
+            return request(app)
+            .patch('/api/comments/9999')
+            .send(voteObj)
+            .expect(404)
+            .then((response)=>{
+                expect(response.body.msg).toBe('comment not found');
+            })
+        });
     });    
 });
