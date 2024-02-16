@@ -1,8 +1,7 @@
 const db = require(`${__dirname}/../connection.js`);
 const fs = require('fs/promises');
 
-function readTopics(req){
-
+function readTopics(){
     const queryString = `SELECT * FROM topics;`;
     return db.query(queryString)
     .then((data)=>{
@@ -11,7 +10,6 @@ function readTopics(req){
 }
 
 function readEndpoints(){
-
     return fs.readFile(`${__dirname}/../../endpoints.json`)
     .then((data)=>{
         const parsedData = JSON.parse(data);
@@ -109,6 +107,14 @@ function removeCommentId(req){
 
 }
 
+function readUsers(){
+    const queryString = `SELECT * FROM users;`;
+    return db.query(queryString)
+    .then((data)=>{
+        return(data.rows)
+    })
+}
+
 function fetchArticleIds(){
     const fetchArticleIdString = `SELECT articles.article_id FROM articles`;
     return db.query(fetchArticleIdString)
@@ -121,4 +127,4 @@ function fetchArticleIds(){
     })
 }
 
-module.exports = { readTopics, readEndpoints, readArticle, readArticles, readArticleComments, writeArticleComments, addArticleVotes, removeCommentId, readComment };
+module.exports = { readTopics, readEndpoints, readArticle, readArticles, readArticleComments, writeArticleComments, addArticleVotes, removeCommentId, readComment, readUsers };
