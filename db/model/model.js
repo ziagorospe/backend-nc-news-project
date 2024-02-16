@@ -118,7 +118,7 @@ function writeArticleComments(req){
                         VALUES ($1, $2, $3) RETURNING *;`;
     return db.query(queryString, [comment.body, comment.username, articleId*1 ])
     .then((data)=>{
-        return data.rows;
+        return data.rows[0];
     })
 }
 
@@ -181,6 +181,17 @@ function addCommentVotes(req){
     })
 }
 
+function writeTopics(req){
+    const topic = req.body;
+    const queryString = `INSERT INTO topics
+                        (slug, description)
+                        VALUES ($1, $2) RETURNING *;`;
+    return db.query(queryString, [topic.slug, topic.description])
+    .then((data)=>{
+        return data.rows[0];
+    })
+}
+
 function fetchValidArray(qString, prop){
     return db.query(qString)
     .then((data)=>{
@@ -192,4 +203,4 @@ function fetchValidArray(qString, prop){
     })
 }
 
-module.exports = { readTopics, readEndpoints, readArticle, readArticles, readArticleComments, writeArticleComments, addArticleVotes, removeCommentId, readComment, readUsers, readUser, addCommentVotes };
+module.exports = { readTopics, readEndpoints, readArticle, readArticles, readArticleComments, writeArticleComments, addArticleVotes, removeCommentId, readComment, readUsers, readUser, addCommentVotes, writeTopics };

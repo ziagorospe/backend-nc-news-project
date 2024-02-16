@@ -158,10 +158,9 @@ describe('NC NEWS', () => {
             .expect(201)
             .then((response)=>{
                 const body = response.body
-                expect(Array.isArray(body.articleComment)).toBe(true);
-                for(let i=0; i<body.articleComment;i++){
-                    expect(Object.keys(body.articleComment[i]).sort()).toEqual(['comment_id','body','article_id','author','created_at','votes'].sort());
-                }  
+                expect(Array.isArray(body.articleComment)).toBe(false);
+                expect(Object.keys(body.articleComment).sort()).toEqual(['comment_id','body','article_id','author','created_at','votes'].sort());
+                expect(body.articleComment.author).toBe('zmoney');  
             })
         });
         test('should reject 400 when not given a request body', () => {
@@ -515,5 +514,24 @@ describe('NC NEWS', () => {
                 expect(response.body.msg).toBe('comment not found');
             })
         });
-    });    
+    }); 
+    describe('POST /api/topics', () => {
+        test('should respond 204 with comment object posted', () => {
+            const topicObj = {
+                "slug": "brian",
+                "description": "I'm Brian"
+              }
+            return request(app)
+            .post("/api/topics")
+            .send(topicObj)
+            .expect(201)
+            .then((response)=>{
+                const body = response.body;
+                console.log(response.body)
+                expect(Object.keys(body.topic).sort()).toEqual(['slug','description'].sort());
+                expect(body.topic.slug).toBe('brian');
+                expect(body.topic.description).toBe("I'm Brian");
+            })
+        });
+    });   
 });
