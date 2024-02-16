@@ -20,6 +20,7 @@ npm install
 
 Seeding the databases:
 npm run setup-dbs
+(make sure .env files have been created before seeding)
 npm run seed
 //the test file will seed the test data when ran
 npm test app
