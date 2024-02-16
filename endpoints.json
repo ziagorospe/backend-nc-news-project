@@ -120,5 +120,16 @@
         }
       ]
     }
+  },
+  "GET /api/users/:username" :{
+    "description": "serves a single user from a username",
+    "queries": [],
+    "exampleResponse": {
+      "user":{
+          "username": "zmoney",
+          "avatar_url": "https://static.wikia.nocookie.net/legendsofthemultiuniverse/images/1/1d/DK-3.png/revision/latest?cb=20150910205847",
+          "name": "zia"
+      }
+    }
   }
 }
