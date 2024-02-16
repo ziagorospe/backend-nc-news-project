@@ -527,7 +527,6 @@ describe('NC NEWS', () => {
             .expect(201)
             .then((response)=>{
                 const body = response.body;
-                console.log(response.body)
                 expect(Object.keys(body.topic).sort()).toEqual(['slug','description'].sort());
                 expect(body.topic.slug).toBe('brian');
                 expect(body.topic.description).toBe("I'm Brian");
