@@ -63,7 +63,6 @@ describe('NC NEWS', () => {
             .get('/api/articles/1')
             .expect(200)
             .then((response)=>{
-                console.log(response.body)
                 expect(Object.keys(response.body.article).sort()).toEqual(['author','article_id','title','topic','created_at','votes','article_img_url','body','comment_count'].sort());
             })
         })
