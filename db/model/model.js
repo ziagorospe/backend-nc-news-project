@@ -1,6 +1,5 @@
 const db = require(`${__dirname}/../connection.js`);
 const fs = require('fs/promises');
-const endPoints = require(`${__dirname}/../../endpoints.json`)
 
 function readTopics(req){
 
@@ -11,7 +10,7 @@ function readTopics(req){
     })
 }
 
-function readEndpoints(req){
+function readEndpoints(){
 
     return fs.readFile(`${__dirname}/../../endpoints.json`)
     .then((data)=>{
@@ -60,6 +59,18 @@ function readArticleComments(req){
     })
 }   
 
+function readComment(req){
+    const commentId = req.params.comment_id;
+    const queryString = `SELECT * FROM comments WHERE comment_id = $1;`;
+    return db.query(queryString, [commentId])
+    .then((data)=>{
+        if(data.rows.length === 0){
+            return Promise.reject({status: 404, msg: 'comment not found'});
+        }
+        return data.rows[0];
+    })
+}
+
 function writeArticleComments(req){
     const articleId = req.params.article_id;
     const comment = req.body;
@@ -75,22 +86,27 @@ function writeArticleComments(req){
 function addArticleVotes(req){
     const articleId = req.params.article_id;
     const voteMod = req.body.inc_votes;
-    const queryString = `UPDATE articles SET votes = $1 WHERE article_id = $2 RETURNING title, topic, author, votes;`;
-    return db.query(`SELECT votes FROM articles WHERE article_id = $1;`, [articleId*1])
+    const queryString = `UPDATE articles SET votes = votes + $1 WHERE article_id = $2 RETURNING title, topic, author, votes;`;
+    return db.query(queryString, [voteMod*1, articleId*1])
     .then((data)=>{
-        let newVotes;
         if(data.rows.length === 0){
             return Promise.reject({status: 404, msg: 'article not found'});
         }
-        if(data.rows[0].votes + voteMod < 0){
-            newVotes = 0;
-        } else {
-            newVotes = data.rows[0].votes + voteMod;
+        return data.rows[0];
+    })
+}
+
+function removeCommentId(req){
+    const commentId = req.params.comment_id;
+    const queryString = `DELETE FROM comments WHERE comment_id = $1 RETURNING *;`;
+    return db.query(queryString, [commentId*1])
+    .then((data)=>{
+        if(data.rows.length === 0){
+            return Promise.reject({status: 404, msg: 'comment not found'});
         }
-        return db.query(queryString, [newVotes, articleId]);
-    }).then((data)=>{
         return data.rows[0]
     })
+
 }
 
 function fetchArticleIds(){
@@ -105,4 +121,4 @@ function fetchArticleIds(){
     })
 }
 
-module.exports = { readTopics, readEndpoints, readArticle, readArticles, readArticleComments, writeArticleComments, addArticleVotes };
+module.exports = { readTopics, readEndpoints, readArticle, readArticles, readArticleComments, writeArticleComments, addArticleVotes, removeCommentId, readComment };
