@@ -21,7 +21,6 @@ function readEndpoints(req){
 }
 
 function readArticle(req){
-    //req.params => {article_id: 'int'}
     const articleId = req.params.article_id*1;
     if(typeof articleId !== 'number' || isNaN(articleId)){
         return Promise.reject({status: 400, msg: 'bad request'});
@@ -55,12 +54,8 @@ function readArticleComments(req){
     }
     const fetchArticleIdString = `SELECT articles.article_id FROM articles`;
     const queryString = `SELECT * FROM comments WHERE comments.article_id = $1 ORDER BY comments.created_at DESC`;
-    return db.query(fetchArticleIdString)
-    .then((data)=>{
-        const validArticleId = []
-        for(let i=0; i<data.rows.length;i++){
-            validArticleId.push(data.rows[i].article_id);
-        }
+    return fetchArticleIds()
+    .then((validArticleId)=>{
         if(!validArticleId.includes(articleId)){
             return Promise.reject({status: 404, msg: 'article not found'});
         }
@@ -77,4 +72,37 @@ function readArticleComments(req){
 
 }   
 
-module.exports = { readTopics, readEndpoints, readArticle, readArticles, readArticleComments };
+function writeArticleComments(req){
+    const articleId = req.params.article_id*1;
+    if(typeof articleId !== 'number' || isNaN(articleId)){
+        return Promise.reject({status: 400, msg: 'bad request'});
+    }
+    const comment = req.body;
+    const queryString = `INSERT INTO comments
+                        (body, author, article_id)
+                        VALUES ($1, $2, $3) RETURNING *;`;
+    return fetchArticleIds()
+    .then((validArticleId)=>{
+        if(!validArticleId.includes(articleId)){
+            return Promise.reject({status: 404, msg: 'article not found'});
+        }
+        return db.query(queryString, [comment.body, comment.username, articleId ])
+    })
+    .then((data)=>{
+        return data.rows
+    })
+}
+
+function fetchArticleIds(){
+    const fetchArticleIdString = `SELECT articles.article_id FROM articles`;
+    return db.query(fetchArticleIdString)
+    .then((data)=>{
+        const validArticleId = []
+        for(let i=0; i<data.rows.length;i++){
+            validArticleId.push(data.rows[i].article_id);
+        }
+        return validArticleId
+    })
+}
+
+module.exports = { readTopics, readEndpoints, readArticle, readArticles, readArticleComments, writeArticleComments };

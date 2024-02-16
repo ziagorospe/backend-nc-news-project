@@ -20,5 +20,10 @@ module.exports = [
     name: 'do_nothing',
     avatar_url:
       'https://www.golenbock.com/wp-content/uploads/2015/01/placeholder-user.png'
+  },
+  {
+    username: 'zmoney',
+    name: 'zia',
+    avatar_url: 'https://static.wikia.nocookie.net/legendsofthemultiuniverse/images/1/1d/DK-3.png/revision/latest?cb=20150910205847'
   }
 ];
