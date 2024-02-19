@@ -88,7 +88,28 @@ describe('NC NEWS', () => {
         test('should reject 400 when given and article ID that does not exist', () => {
             return request(app)
             .get('/api/articles/9999')
+            .expect(404)
+        });
+        test('should reject 404 when given a string for the article ID', () => {
+            return request(app)
+            .get('/api/articles/forklift')
             .expect(400)
+        });
+    });
+    describe('GET /api/articles', () => {
+        test('should respond 200', () => {
+            return request(app)
+            .get('/api/articles')
+            .expect(200)
+        });
+        test('should respond with all articles with correct properties, sorted by date descending', () => {
+            return request(app)
+            .get('/api/articles')
+            .expect(200)
+            .then((response)=>{
+                expect(Object.keys(response.body.articles[0]).sort()).toEqual(['author','title','article_id','topic','created_at','votes', 'article_img_url', 'comment_count'].sort());
+                expect(response.body.articles).toBeSortedBy('created_at', {descending: true});
+            })
         });
     });      
 });
