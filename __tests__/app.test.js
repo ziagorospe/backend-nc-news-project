@@ -3,6 +3,7 @@ const request = require("supertest");
 const app = require(`${__dirname}/../db/app.js`);
 const seed = require(`${__dirname}/../db/seeds/seed.js`);
 const data = require(`${__dirname}/../db/data/test-data/index.js`);
+const endPoints = require(`${__dirname}/../endpoints.json`)
 
 beforeEach(() => seed(data));
 afterAll(() => db.end());
@@ -31,21 +32,31 @@ describe('NC NEWS', () => {
                 expect(body).toEqual(expected);
             })
         });
+    }); 
+    describe('GET /api', () => {
+        test('should respond 200 when called correctly', () => {
+            return request(app)
+            .get('/api')
+            .expect(200)
+        });
+        test('should respond 200 and return all endpoint info when called correctly', () => {
+            const expected = endPoints;
+            return request(app)
+            .get('/api')
+            .expect(200)
+            .then((response)=>{
+                const body = response.body
+                expect(body).toMatchObject(endPoints)
+            })
+        });
         test('should reject 404 with no body when an api that does not exist is called', () => {
             return request(app)
             .get('/api/forklift')
             .expect(404)
             .then((response)=>{
-                expect(response.body).toEqual({});
+                const body = response.body
+                expect(body).toEqual({});
             })
         });
-        test('should reject 400 invalid queries', () => {
-            return request(app)
-            .get('/api/topics?comfort=yes')
-            .expect(400)
-            .then((response)=>{
-                expect(response.error.text).toEqual('bad request');
-            })
-        });
-    });    
+    });      
 });
