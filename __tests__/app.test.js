@@ -85,19 +85,23 @@ describe('NC NEWS', () => {
                 expect(body.article).toEqual(validArticle);
             })
         })
-        test('should reject 400 when given and article ID that does not exist', () => {
+        test('should reject 404 when given and article ID that does not exist', () => {
             return request(app)
             .get('/api/articles/9999')
             .expect(404)
+            .then((response)=>{
+                const body = response.body;
+                expect(body.msg).toBe('article not found');
+            })
         });
-        test('should reject 404 when given a string for the article ID', () => {
+        test('should reject 400 when given a string for the article ID', () => {
             return request(app)
             .get('/api/articles/forklift')
             .expect(400)
         });
     });
     describe('GET /api/articles', () => {
-        test('should respond 200', () => {
+        test('should respond 200 when called correctly', () => {
             return request(app)
             .get('/api/articles')
             .expect(200)
@@ -109,6 +113,50 @@ describe('NC NEWS', () => {
             .then((response)=>{
                 expect(Object.keys(response.body.articles[0]).sort()).toEqual(['author','title','article_id','topic','created_at','votes', 'article_img_url', 'comment_count'].sort());
                 expect(response.body.articles).toBeSortedBy('created_at', {descending: true});
+            })
+        });
+    });
+    describe('GET /api/articles/:article_id/comments', () => {
+        test('should respond 200 when called correctly', () => {
+            return request(app)
+            .get('/api/articles/1/comments')
+            .expect(200)
+        });
+        test('should respond 200 with an object with key of articleComments and a value of an array of comment objects, ordered by created_at descending', () => {
+            return request(app)
+            .get('/api/articles/1/comments')
+            .expect(200)
+            .then((response)=>{
+                expect(Array.isArray(response.body.articleComments)).toBe(true);
+                expect(Object.keys(response.body.articleComments[0]).sort()).toEqual(['comment_id','body','article_id','author','created_at','votes'].sort());
+                expect(response.body.articleComments).toBeSortedBy('created_at', {descending: true});
+            })
+        });
+        test('should reject 400 when given a string for the article ID', () => {
+            return request(app)
+            .get('/api/articles/forklift/comments')
+            .expect(400)
+            .then((response)=>{
+                const body = response.body;
+                expect(body.msg).toBe('bad request');
+            })
+        });
+        test('should reject 404 when given an article ID that does not exist', () => {
+            return request(app)
+            .get('/api/articles/9999/comments')
+            .expect(404)
+            .then((response)=>{
+                const body = response.body;
+                expect(body.msg).toBe('article not found');
+            })
+        });
+        test('should respond 200 with msg "no comments found" if article ID exists and no comments found', () => {
+            return request(app)
+            .get('/api/articles/2/comments')
+            .expect(200)
+            .then((response)=>{
+                const body = response.body;
+                expect(body.msg).toBe('no comments found :(');
             })
         });
     });      
