@@ -94,7 +94,7 @@ describe('NC NEWS', () => {
                 expect(body.msg).toBe('article not found');
             })
         });
-        test('should reject 400 when given a string for the article ID', () => {
+        test('should reject 400 when given an invalid article ID', () => {
             return request(app)
             .get('/api/articles/forklift')
             .expect(400)
@@ -132,7 +132,7 @@ describe('NC NEWS', () => {
                 expect(response.body.articleComments).toBeSortedBy('created_at', {descending: true});
             })
         });
-        test('should reject 400 when given a string for the article ID', () => {
+        test('should reject 400 when given an invalid article ID', () => {
             return request(app)
             .get('/api/articles/forklift/comments')
             .expect(400)
@@ -159,5 +159,66 @@ describe('NC NEWS', () => {
                 expect(body.msg).toBe('no comments found :(');
             })
         });
-    });      
+    });  
+    describe('POST api/articles/:article_id/comments', () => {
+        test('should respond 201 with posted comment when called with valid ID and body', () => {
+            const commentObj = {
+                username: 'zmoney',
+                body: 'mic check, 1-2, 1-2'
+            }
+            return request(app)
+            .post('/api/articles/2/comments')
+            .send(commentObj)
+            .expect(201)
+            .then((response)=>{
+                const body = response.body
+                expect(Array.isArray(body.articleComment)).toBe(true);
+                expect(Object.keys(body.articleComment[0]).sort()).toEqual(['comment_id','body','article_id','author','created_at','votes'].sort());
+            })
+        });
+        test('should reject 404 when given an article ID that does not exist', () => {
+            return request(app)
+            .post('/api/articles/9999/comments')
+            .expect(404)
+            .then((response)=>{
+                const body = response.body;
+                expect(body.msg).toBe('article not found');
+            })
+        });
+        test('should reject 400 when not given a request body', () => {
+            return request(app)
+            .post('/api/articles/1/comments')
+            .expect(400)
+            .then((response)=>{
+                expect(response.body.code).toBe('23502');
+            })
+        });
+        test('should reject 400 when given invalid request body', () => {
+            const commentObj = {
+                username: 'shark',
+                body: 34
+            }
+            return request(app)
+            .post('/api/articles/2/comments')
+            .send(commentObj)
+            .expect(400)
+            .then((response)=>{
+                expect(response.body.code).toBe('23503');
+            })
+        });
+        test('should reject 400 when given an invalid article ID', () => {
+            const commentObj = {
+                username: 'zmoney',
+                body: 'mic check, 1-2, 1-2'
+            }
+            return request(app)
+            .post('/api/articles/forklift/comments')
+            .send(commentObj)
+            .expect(400)
+            .then((response)=>{
+                const body = response.body;
+                expect(body.msg).toBe('bad request');
+            })
+        });
+    });    
 });
