@@ -86,7 +86,7 @@ describe('NC NEWS', () => {
             .get('/api/articles/forklift')
             .expect(400)
             .then((response)=>{
-                expect(response.body.code).toBe('22P02');
+                expect(response.body.msg).toBe('bad request');
             })
         });
         test('should reject 404 when given and article ID that does not exist', () => {
@@ -176,7 +176,7 @@ describe('NC NEWS', () => {
             .post('/api/articles/1/comments')
             .expect(400)
             .then((response)=>{
-                expect(response.body.code).toBe('23502');
+                expect(response.body.msg).toBe('bad request');
             })
         });
         test('should reject 400 when given an invalid article ID', () => {
@@ -189,7 +189,7 @@ describe('NC NEWS', () => {
             .send(commentObj)
             .expect(400)
             .then((response)=>{
-                expect(response.body.code).toBe('22P02');
+                expect(response.body.msg).toBe('bad request');
             })
         });
         test('should reject 404 when given an article ID that does not exist', () => {
@@ -202,7 +202,7 @@ describe('NC NEWS', () => {
             .send(commentObj)
             .expect(404)
             .then((response)=>{
-                expect(response.body.code).toBe('23503');
+                expect(response.body.msg).toBe('not found');
             })
         });
         test('should reject 404 when given user that does not exist', () => {
@@ -215,31 +215,32 @@ describe('NC NEWS', () => {
             .send(commentObj)
             .expect(404)
             .then((response)=>{
-                expect(response.body.code).toBe('23503');
+                expect(response.body.msg).toBe('not found');
             })
         });
     });
     describe('PATCH /api/articles/:article_id', () => {
-        test('should respond 200 with the updated article object', () => {
+        test('should respond 200 with the updated article object and the correctly updated number of votes', () => {
             const voteObj = { inc_votes: 5 }
             return request(app)
             .patch('/api/articles/2')
             .send(voteObj)
-            .expect(200)
-            .then((response)=>{
+            .then(()=>{
+                return request(app)
+                .patch('/api/articles/2')
+                .send(voteObj)
+                .expect(200)  
+            }).then((response)=>{
                 const body = response.body;
                 expect(Array.isArray(body.article)).toBe(false);
                 expect(Object.keys(body.article).sort()).toEqual(['title','topic','author','votes'].sort());
-            })
-        });
-        test('should respond 200 with votes property 0 if the votes would have summed less than 0', () => {
-            const voteObj = { inc_votes: -9999999 }
-            return request(app)
-            .patch('/api/articles/2')
-            .send(voteObj)
-            .expect(200)
-            .then((response)=>{
-                expect(response.body.article.votes).toBe(0);
+                expect(body.article.votes).toBe(10);
+                return request(app)
+                .patch('/api/articles/2')
+                .send({inc_votes: -20})
+                .expect(200)  
+            }).then((response)=>{
+                expect(response.body.article.votes).toBe(-10);
             })
         });
         test('should reject 400 invalid vote values', () => {
@@ -249,7 +250,7 @@ describe('NC NEWS', () => {
             .send(voteObj)
             .expect(400)
             .then((response)=>{
-                expect(response.body.code).toBe('22P02');
+                expect(response.body.msg).toBe('bad request');
             })
         });
         test('should reject 400 invalid article IDs', () => {
@@ -259,7 +260,7 @@ describe('NC NEWS', () => {
             .send(voteObj)
             .expect(400)
             .then((response)=>{
-                expect(response.body.code).toBe('22P02');
+                expect(response.body.msg).toBe('bad request');
             })
         });
         test('should reject 404 valid article IDs that do not exist', () => {
@@ -270,6 +271,43 @@ describe('NC NEWS', () => {
             .expect(404)
             .then((response)=>{
                 expect(response.body.msg).toBe('article not found');
+            })
+        });
+    });
+    describe('DELETE /api/comments/:comment_id', () => {
+        test('should respond 204 with no content after deletion', () => {
+            return request(app)
+            .delete('/api/comments/3')
+            .expect(204)
+        });
+        test('should respond 204 and comment should no longer exist in the database', () => {
+            return request(app)
+            .delete('/api/comments/3')
+            .expect(204)
+            .then((response)=>{
+                expect(response.body).toEqual({});
+                return request(app)
+                .get('/api/comments/3')
+                .expect(404)
+            })
+            .then((response)=>{
+                expect(response.body.msg).toBe('comment not found');
+            }) 
+        });
+        test('should reject 400 invalid article ID ', () => {
+            return request(app)
+            .delete('/api/comments/forklift')
+            .expect(400)
+            .then((response)=>{
+                expect(response.body.msg).toBe('bad request');
+            })
+        });
+        test('should reject 404 valid comment ID that does not exist', () => {
+            return request(app)
+            .delete('/api/comments/9999')
+            .expect(404)
+            .then((response)=>{
+                expect(response.body.msg).toBe('comment not found');
             })
         });
     });    

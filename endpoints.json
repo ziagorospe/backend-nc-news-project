@@ -28,7 +28,7 @@
     }
   },
   "GET /api/articles/:article_id": {
-    "description": "serves an array of a single article",
+    "description": "serves a single article object from an article_id",
     "queries": [],
     "exampleResponse": {
       "article": {
@@ -45,7 +45,7 @@
     }
   },
   "GET /api/articles/:article_id/comments":{
-    "description": "serves an array of all comments for a single article",
+    "description": "serves an array of all comments for a single article from an article_id",
     "queries": [],
     "exampleResponse": {
       "articleComments": [
@@ -60,8 +60,22 @@
       ]
     }
   },
+  "GET /api/comments/:comment_id":{
+    "description": "serves a single comment object from a comment_id",
+    "queries": [],
+    "exampleResponse":{
+      "comment": {
+        "comment_id": 3,
+        "body": "Replacing the quiet elegance of the dark suit and tie with the casual indifference of these muted earth tones is a form of fashion suicide, but, uh, call me crazy — onyou it works.",
+        "article_id": 1,
+        "author": "icellusedkars",
+        "votes": 100,
+        "created_at": "2020-03-01T01:13:00.000Z"
+      }
+    }
+  },
   "POST api/articles/:article_id/comments" :{
-    "description": "posts a single comment object with username and body keys and serves the posted comment for a single article",
+    "description": "posts a single comment object with username and body keys and serves the posted comment for a single article from an article_id",
     "queries": [],
     "exampleResponse": {
       "articleComment": [
@@ -77,7 +91,7 @@
     }
   },
   "PATCH /api/articles/:article_id" :{
-    "description": "patches a single article object's vote property",
+    "description": "patches a single article object's vote property from an article_id",
     "queries": [],
     "exampleResponse": {
       "article": {
@@ -87,5 +101,10 @@
         "votes": 5
       }
     }
+  },
+  "DELETE /api/comments/:comment_id" :{
+    "description": "deletes a single comment object from a comment_id",
+    "queries": [],
+    "exampleResponse":{}
   }
 }

@@ -1,4 +1,4 @@
-const { readTopics, readEndpoints, readArticle, readArticles, readArticleComments, writeArticleComments, addArticleVotes} = require(`${__dirname}/../model/model.js`)
+const { readTopics, readEndpoints, readArticle, readArticles, readArticleComments, writeArticleComments, addArticleVotes, removeCommentId, readComment} = require(`${__dirname}/../model/model.js`)
 
 function getTopics(req, res, next){
     readTopics(req)
@@ -11,12 +11,12 @@ function getTopics(req, res, next){
     .catch(next);
 }
 
-function getEndpoints(req, res, next){
-    readEndpoints(req)
-    .then((endPoints) => {
-        res.status(200).send(endPoints);
+function getArticles(req, res, next){
+    readArticles()
+    .then((articles)=>{
+        res.status(200).send({articles: articles});
     })
-    .catch(next);  
+    .catch(next);
 }
 
 function getArticle(req, res, next){
@@ -27,12 +27,20 @@ function getArticle(req, res, next){
     .catch(next);
 }
 
-function getArticles(req, res, next){
-    readArticles()
-    .then((articles)=>{
-        res.status(200).send({articles: articles});
+function getComment(req, res, next){
+    readComment(req)
+    .then((comment)=>{
+        res.status(200).send({comment: comment})
     })
-    .catch(next);
+    .catch(next)
+}
+
+function getEndpoints(req, res, next){
+    readEndpoints(req)
+    .then((endPoints) => {
+        res.status(200).send(endPoints);
+    })
+    .catch(next);  
 }
 
 function getArticleComments(req, res, next){
@@ -59,4 +67,12 @@ function patchArticleVotes(req, res, next){
     .catch(next)
 }
 
-module.exports = { getTopics, getEndpoints, getArticle, getArticles, getArticleComments, postArticleComments, patchArticleVotes }
+function deleteCommentId(req, res, next){
+    removeCommentId(req)
+    .then(()=>{
+        res.status(204).send()
+    })
+    .catch(next)
+}
+
+module.exports = { getTopics, getArticles, getArticle, getComment, getEndpoints, getArticleComments, postArticleComments, patchArticleVotes, deleteCommentId }
