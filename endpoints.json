@@ -75,5 +75,17 @@
         }
       ]
     }
+  },
+  "PATCH /api/articles/:article_id" :{
+    "description": "patches a single article object's vote property",
+    "queries": [],
+    "exampleResponse": {
+      "article": {
+        "title": "Sony Vaio; or, The Laptop",
+        "topic": "mitch",
+        "author": "icellusedkars",
+        "votes": 5
+      }
+    }
   }
 }
