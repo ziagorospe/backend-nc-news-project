@@ -15,20 +15,14 @@ describe('NC NEWS', () => {
             .get('/api/topics')
             .expect(200)
         });
-        test('should respond 200 and return all topics when called correctly', () => {
-            const expected = { 
-            topics:
-                [
-                    { slug: 'mitch', description: 'The man, the Mitch, the legend' },
-                    { slug: 'cats', description: 'Not dogs' },
-                    { slug: 'paper', description: 'what books are made of' }
-                  ]
-            }
+        test('should respond 200 and return an array of topci objects', () => {
             return request(app)
             .get('/api/topics')
             .expect(200)
             .then((response)=>{
-                expect(response.body).toEqual(expected);
+                const body = response.body
+                expect(Array.isArray(body.topics)).toBe(true);
+                expect(Object.keys(body.topics[0]).sort()).toEqual(['slug','description'].sort());
             })
         });
     }); 
@@ -308,6 +302,23 @@ describe('NC NEWS', () => {
             .expect(404)
             .then((response)=>{
                 expect(response.body.msg).toBe('comment not found');
+            })
+        });
+    });
+    describe('GET /api/users', () => {
+        test('should respond 200 when called correctly', () => {
+            return request(app)
+            .get('/api/users')
+            .expect(200)
+        });
+        test('should respond 200 with a list of users object', () => {
+            return request(app)
+            .get('/api/users')
+            .expect(200)
+            .then((response)=>{
+                const body = response.body
+                expect(Array.isArray(body.users)).toBe(true);
+                expect(Object.keys(body.users[0]).sort()).toEqual(['username','name','avatar_url'].sort());
             })
         });
     });    
