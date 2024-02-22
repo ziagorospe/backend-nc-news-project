@@ -18,8 +18,12 @@ function readEndpoints(){
 }
 
 function readArticle(req){
+    const queryString = `SELECT articles.author, articles.title, articles.body, articles.article_id, articles.topic, articles.created_at, articles.votes, article_img_url, COUNT(comments.article_id)::int AS comment_count 
+    FROM articles 
+    LEFT JOIN comments ON articles.article_id = comments.article_id
+    WHERE articles.article_id = $1
+    GROUP BY articles.article_id;`
     const articleId = req.params.article_id;
-    const queryString = `SELECT * FROM articles WHERE articles.article_id = $1;`;
     return db.query(queryString, [articleId])
     .then((data)=>{
         if(data.rows.length === 0){
