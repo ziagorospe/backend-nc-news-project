@@ -361,5 +361,84 @@ describe('NC NEWS', () => {
                 expect(response.body.articles).toEqual([]);
             })
         });
+    });
+    describe('GET /api/articles?sort=:sort&order=:order', () => {
+        test('should respond 200 with article objects sorted by created_at(default), ordered ascending when queried', () => {
+            return request(app)
+            .get("/api/articles?order=ASC")
+            .expect(200)
+            .then((response)=>{
+                const body = response.body
+                for(let i=0; i<body.articles;i++){
+                expect(Object.keys(body.articles[i]).sort()).toEqual(['author','title','article_id','topic','created_at','votes', 'article_img_url', 'comment_count'].sort());
+                }
+                expect(body.articles).toBeSortedBy('created_at', {ascending: true});
+            })
+        });
+        test('should respond 200 with article objects sorted by author, ordered descending(default) when queried', () => {
+            return request(app)
+            .get("/api/articles?sort=author")
+            .expect(200)
+            .then((response)=>{
+                const body = response.body
+                for(let i=0; i<body.articles;i++){
+                expect(Object.keys(body.articles[i]).sort()).toEqual(['author','title','article_id','topic','created_at','votes', 'article_img_url', 'comment_count'].sort());
+                }
+                expect(body.articles).toBeSortedBy('author', {descending: true});
+            })
+        });
+        test('should respond 200 with article objects sorted by comment_count, ordered ascending when queried', () => {
+            return request(app)
+            .get("/api/articles?order=ASC&sort=comment_count")
+            .expect(200)
+            .then((response)=>{
+                const body = response.body
+                for(let i=0; i<body.articles;i++){
+                expect(Object.keys(body.articles[i]).sort()).toEqual(['author','title','article_id','topic','created_at','votes', 'article_img_url', 'comment_count'].sort());
+                }
+                expect(body.articles).toBeSortedBy('comment_count', {ascending: true});
+            })
+        });
+        test('should respond 200 with article objects sorted by title, ordered ascending when queried regardless of case', () => {
+            return request(app)
+            .get("/api/articles?order=AsC&sort=Title")
+            .expect(200)
+            .then((response)=>{
+                const body = response.body
+                for(let i=0; i<body.articles;i++){
+                expect(Object.keys(body.articles[i]).sort()).toEqual(['author','title','article_id','topic','created_at','votes', 'article_img_url', 'comment_count'].sort());
+                }
+                expect(body.articles).toBeSortedBy('title', {ascending: true});
+            })
+        });
+        test('should respond 200 with article objects sorted by title, ordered ascending, filtered by topic when queried', () => {
+            return request(app)
+            .get("/api/articles?order=ASC&sort=title&topic=mitch")
+            .expect(200)
+            .then((response)=>{
+                const body = response.body
+                for(let i=0; i<body.articles;i++){
+                    expect(Object.keys(body.articles[i]).sort()).toEqual(['author','title','article_id','topic','created_at','votes', 'article_img_url', 'comment_count'].sort());
+                    expect(body.articles[i].topic).toBe('mitch');
+                    }
+                expect(body.articles).toBeSortedBy('title', {ascending: true});
+            })
+        });
+        test('should reject 400 invalid order queries', () => {
+            return request(app)
+            .get("/api/articles?order=57")
+            .expect(400)
+            .then((response)=>{
+                expect(response.body.msg).toBe('bad request, invalid order');
+            })
+        });
+        test('should reject 400 invalid sort queries', () => {
+            return request(app)
+            .get("/api/articles?sort=brian")
+            .expect(400)
+            .then((response)=>{
+                expect(response.body.msg).toBe('bad request, invalid sort');
+            })
+        });
     });    
 });
