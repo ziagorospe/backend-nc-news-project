@@ -22,7 +22,9 @@ describe('NC NEWS', () => {
             .then((response)=>{
                 const body = response.body
                 expect(Array.isArray(body.topics)).toBe(true);
-                expect(Object.keys(body.topics[0]).sort()).toEqual(['slug','description'].sort());
+                for(let i=0; i<body.topics;i++){
+                    expect(Object.keys(body.topics[i]).sort()).toEqual(['slug','description'].sort());
+                }
             })
         });
     }); 
@@ -103,8 +105,11 @@ describe('NC NEWS', () => {
             .get('/api/articles')
             .expect(200)
             .then((response)=>{
-                expect(Object.keys(response.body.articles[0]).sort()).toEqual(['author','title','article_id','topic','created_at','votes', 'article_img_url', 'comment_count'].sort());
-                expect(response.body.articles).toBeSortedBy('created_at', {descending: true});
+                const body = response.body
+                for(let i=0; i<body.articles;i++){
+                expect(Object.keys(body.articles[i]).sort()).toEqual(['author','title','article_id','topic','created_at','votes', 'article_img_url', 'comment_count'].sort());
+                }
+                expect(body.articles).toBeSortedBy('created_at', {descending: true});
             })
         });
     });
@@ -119,9 +124,12 @@ describe('NC NEWS', () => {
             .get('/api/articles/1/comments')
             .expect(200)
             .then((response)=>{
-                expect(Array.isArray(response.body.articleComments)).toBe(true);
-                expect(Object.keys(response.body.articleComments[0]).sort()).toEqual(['comment_id','body','article_id','author','created_at','votes'].sort());
-                expect(response.body.articleComments).toBeSortedBy('created_at', {descending: true});
+                const body = response.body
+                expect(Array.isArray(body.articleComments)).toBe(true);
+                for(let i=0; i<body.articleComments;i++){
+                    expect(Object.keys(body.articleComments[i]).sort()).toEqual(['comment_id','body','article_id','author','created_at','votes'].sort());
+                } 
+                expect(body.articleComments).toBeSortedBy('created_at', {descending: true});
             })
         });
         test('should reject 400 when given an invalid article ID', () => {
@@ -129,7 +137,7 @@ describe('NC NEWS', () => {
             .get('/api/articles/forklift/comments')
             .expect(400)
             .then((response)=>{
-                expect(response.body.code).toBe('22P02');
+                expect(response.body.msg).toBe('bad request');
             })
         });
         test('should reject 404 when given an article ID that does not exist', () => {
@@ -162,7 +170,9 @@ describe('NC NEWS', () => {
             .then((response)=>{
                 const body = response.body
                 expect(Array.isArray(body.articleComment)).toBe(true);
-                expect(Object.keys(body.articleComment[0]).sort()).toEqual(['comment_id','body','article_id','author','created_at','votes'].sort());
+                for(let i=0; i<body.articleComment;i++){
+                    expect(Object.keys(body.articleComment[i]).sort()).toEqual(['comment_id','body','article_id','author','created_at','votes'].sort());
+                }  
             })
         });
         test('should reject 400 when not given a request body', () => {
@@ -318,7 +328,48 @@ describe('NC NEWS', () => {
             .then((response)=>{
                 const body = response.body
                 expect(Array.isArray(body.users)).toBe(true);
-                expect(Object.keys(body.users[0]).sort()).toEqual(['username','name','avatar_url'].sort());
+                for(let i=0; i<body.users.length;i++){
+                    expect(Object.keys(body.users[i]).sort()).toEqual(['username','name','avatar_url'].sort());
+                }
+            })
+        });
+    });
+    describe('GET /api/articles?topic=:topic', () => {
+        test('should respond 200 with an array of article objects filtered by topic, sorted by date descending', () => {
+            return request(app)
+            .get("/api/articles?topic=mitch")
+            .expect(200)
+            .then((response)=>{
+                const body = response.body
+                for(let i=0; i<body.articles;i++){
+                expect(Object.keys(body.articles[i]).sort()).toEqual(['author','title','article_id','topic','created_at','votes', 'article_img_url', 'comment_count'].sort());
+                expect(body.articles[i].topic).toBe('mitch');
+                }
+                expect(body.articles).toBeSortedBy('created_at', {descending: true});
+            })
+        });
+        test('should reject 400 if given and invalid topic query', () => {
+            return request(app)
+            .get("/api/articles?topic=Õ192ÖxyÕ67")
+            .expect(400)
+            .then((response)=>{
+                expect(response.badRequest).toBe(true);
+            })
+        });
+        test('should reject 404 if given a valid topic query that does not exist', () => {
+            return request(app)
+            .get("/api/articles?topic=brian")
+            .expect(404)
+            .then((response)=>{
+                expect(response.body.msg).toBe('topic not found');
+            })
+        });
+        test('should respond 200 with msg "no articles with that topic found" if given a valid topic that doesnt have any related articles', () => {
+            return request(app)
+            .get("/api/articles?topic=paper")
+            .expect(200)
+            .then((response)=>{
+                expect(response.body.msg).toBe('no articles with that topic found :(');
             })
         });
     });    

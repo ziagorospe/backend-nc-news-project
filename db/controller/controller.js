@@ -12,7 +12,7 @@ function getTopics(req, res, next){
 }
 
 function getArticles(req, res, next){
-    readArticles()
+    readArticles(req)
     .then((articles)=>{
         res.status(200).send({articles: articles});
     })
