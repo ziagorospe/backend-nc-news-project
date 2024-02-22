@@ -152,7 +152,19 @@ function readUsers(){
     const queryString = `SELECT * FROM users;`;
     return db.query(queryString)
     .then((data)=>{
-        return(data.rows)
+        return data.rows;
+    })
+}
+
+function readUser(req){
+    const userId = req.params.username;
+    const queryString = `SELECT username, avatar_url, name FROM users WHERE username = $1;`;
+    return db.query(queryString, [userId])
+    .then((data)=>{
+        if(data.rows.length === 0){
+            return Promise.reject({status: 404, msg: 'user not found'});
+        }
+        return data.rows[0];
     })
 }
 
@@ -167,4 +179,4 @@ function fetchValidArray(qString, prop){
     })
 }
 
-module.exports = { readTopics, readEndpoints, readArticle, readArticles, readArticleComments, writeArticleComments, addArticleVotes, removeCommentId, readComment, readUsers };
+module.exports = { readTopics, readEndpoints, readArticle, readArticles, readArticleComments, writeArticleComments, addArticleVotes, removeCommentId, readComment, readUsers, readUser };

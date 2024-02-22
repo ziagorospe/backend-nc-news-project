@@ -1,4 +1,4 @@
-const { readTopics, readEndpoints, readArticle, readArticles, readArticleComments, writeArticleComments, addArticleVotes, removeCommentId, readComment, readUsers} = require(`${__dirname}/../model/model.js`)
+const { readTopics, readEndpoints, readArticle, readArticles, readArticleComments, writeArticleComments, addArticleVotes, removeCommentId, readComment, readUsers, readUser} = require(`${__dirname}/../model/model.js`)
 
 function getTopics(req, res, next){
     readTopics()
@@ -30,7 +30,7 @@ function getArticle(req, res, next){
 function getComment(req, res, next){
     readComment(req)
     .then((comment)=>{
-        res.status(200).send({comment: comment})
+        res.status(200).send({comment: comment});
     })
     .catch(next)
 }
@@ -38,7 +38,15 @@ function getComment(req, res, next){
 function getUsers(req, res, next){
     readUsers()
     .then((users)=>{
-        res.status(200).send({users: users})
+        res.status(200).send({users: users});
+    })
+    .catch(next)
+}
+
+function getUser(req, res, next){
+    readUser(req)
+    .then((user)=>{
+        res.status(200).send({user: user});
     })
     .catch(next)
 }
@@ -83,4 +91,4 @@ function deleteCommentId(req, res, next){
     .catch(next)
 }
 
-module.exports = { getTopics, getArticles, getArticle, getComment, getUsers, getEndpoints, getArticleComments, postArticleComments, patchArticleVotes, deleteCommentId }
+module.exports = { getTopics, getArticles, getArticle, getComment, getUsers, getUser, getEndpoints, getArticleComments, postArticleComments, patchArticleVotes, deleteCommentId }

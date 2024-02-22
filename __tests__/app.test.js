@@ -440,5 +440,25 @@ describe('NC NEWS', () => {
                 expect(response.body.msg).toBe('bad request, invalid sort');
             })
         });
+    });
+    describe('GET /api/users/:username', () => {
+        test('should respond 200 with the queried user', () => {
+            return request(app)
+            .get("/api/users/zmoney")
+            .expect(200)
+            .then((response)=>{
+                const body = response.body;
+                expect(Object.keys(body.user).sort()).toEqual(['username','avatar_url','name'].sort());
+                expect(body.user.username).toBe('zmoney');
+            })
+        });
+        test('should reject 404 valid username that does not exist', () => {
+            return request(app)
+            .get("/api/users/brian")
+            .expect(404)
+            .then((response)=>{
+                expect(response.body.msg).toBe('user not found');
+            })
+        });
     });    
 });
