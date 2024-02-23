@@ -168,6 +168,19 @@ function readUser(req){
     })
 }
 
+function addCommentVotes(req){
+    const commentId = req.params.comment_id;
+    const voteMod = req.body.inc_votes;
+    const queryString = `UPDATE comments SET votes = votes + $1 WHERE comment_id = $2 RETURNING body, article_id, author, votes, created_at;`;
+    return db.query(queryString, [voteMod*1, commentId*1])
+    .then((data)=>{
+        if(data.rows.length === 0){
+            return Promise.reject({status: 404, msg: 'comment not found'});
+        }
+        return data.rows[0];
+    })
+}
+
 function fetchValidArray(qString, prop){
     return db.query(qString)
     .then((data)=>{
@@ -179,4 +192,4 @@ function fetchValidArray(qString, prop){
     })
 }
 
-module.exports = { readTopics, readEndpoints, readArticle, readArticles, readArticleComments, writeArticleComments, addArticleVotes, removeCommentId, readComment, readUsers, readUser };
+module.exports = { readTopics, readEndpoints, readArticle, readArticles, readArticleComments, writeArticleComments, addArticleVotes, removeCommentId, readComment, readUsers, readUser, addCommentVotes };
