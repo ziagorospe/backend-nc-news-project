@@ -516,7 +516,7 @@ describe('NC NEWS', () => {
         });
     }); 
     describe('POST /api/topics', () => {
-        test('should respond 204 with comment object posted', () => {
+        test('should respond 201 with comment object posted', () => {
             const topicObj = {
                 "slug": "brian",
                 "description": "I'm Brian"
@@ -530,6 +530,76 @@ describe('NC NEWS', () => {
                 expect(Object.keys(body.topic).sort()).toEqual(['slug','description'].sort());
                 expect(body.topic.slug).toBe('brian');
                 expect(body.topic.description).toBe("I'm Brian");
+            })
+        });
+    });
+    describe('POST /api/articles', () => {
+        test('should respond 201 with article object posted without url provided', () => {
+            const articleObj = {
+                title: "test title",
+                topic: "paper",
+                author: "zmoney",
+                body: "test body"
+
+            }
+            return request(app)
+            .post("/api/articles")
+            .send(articleObj)
+            .expect(201)
+            .then((response)=>{
+                const body = response.body;
+                expect(Object.keys(body.article).sort()).toEqual(['article_id', 'title', 'topic','author', 'body', 'created_at', 'votes', 'article_img_url'].sort());
+            })
+        });
+        test('should respond 201 with article object posted with url provided', () => {
+            const articleObj = {
+                title: "test title",
+                topic: "paper",
+                author: "zmoney",
+                body: "test body",
+                article_img_url: "test url"
+
+            }
+            return request(app)
+            .post("/api/articles")
+            .send(articleObj)
+            .expect(201)
+            .then((response)=>{
+                const body = response.body;
+                expect(Object.keys(body.article).sort()).toEqual(['article_id', 'title', 'topic','author', 'body', 'created_at', 'votes', 'article_img_url'].sort());
+                expect(body.article.article_img_url).toBe("test url");
+            })
+        });
+        test('should reject 404 article object with valid topic that does not exist', () => {
+            const articleObj = {
+                title: "test title",
+                topic: "test topic",
+                author: "zmoney",
+                body: "test body"
+
+            }
+            return request(app)
+            .post("/api/articles")
+            .send(articleObj)
+            .expect(404)
+            .then((response)=>{
+                expect(response.body.msg).toBe('not found');
+            })
+        });
+        test('should reject 404 article object with valid author that does not exist', () => {
+            const articleObj = {
+                title: "test title",
+                topic: "cats",
+                author: "test author",
+                body: "test body"
+
+            }
+            return request(app)
+            .post("/api/articles")
+            .send(articleObj)
+            .expect(404)
+            .then((response)=>{
+                expect(response.body.msg).toBe('not found');
             })
         });
     });   

@@ -1,6 +1,6 @@
 const express = require("express");
 const app = express();
-const { getTopics, getArticles, getArticle, getComment, getUsers, getUser, getEndpoints, getArticleComments, postArticleComments, postTopics, patchArticleVotes, patchCommentVotes, deleteCommentId } = require(`${__dirname}/controller/controller.js`);
+const { getTopics, getArticles, getArticle, getComment, getUsers, getUser, getEndpoints, getArticleComments, postArticleComments, postTopics, postArticles, patchArticleVotes, patchCommentVotes, deleteCommentId } = require(`${__dirname}/controller/controller.js`);
 const {handleCustomErrors, handlePsqlErrors} = require(`${__dirname}/controller/error.controller.js`);
 
 app.use(express.json());
@@ -15,12 +15,12 @@ app.get("/api/users/:username", getUser);
 app.get("/api", getEndpoints);
 app.post("/api/articles/:article_id/comments", postArticleComments);
 app.post("/api/topics", postTopics);
+app.post("/api/articles", postArticles);
 app.patch("/api/articles/:article_id", patchArticleVotes);
 app.patch("/api/comments/:comment_id", patchCommentVotes);
 app.delete("/api/comments/:comment_id", deleteCommentId);
 
 app.use(handlePsqlErrors);
 app.use(handleCustomErrors);
-
 
 module.exports = app;

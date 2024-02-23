@@ -192,6 +192,27 @@ function writeTopics(req){
     })
 }
 
+function writeArticles(req){
+    const article = req.body;
+    const url = article.article_img_url;
+    let queryString = `INSERT INTO articles
+                        (title, topic, author, body)
+                        VALUES ($1, $2, $3, $4) RETURNING *;`;
+    if(url){
+        queryString = `INSERT INTO articles
+                        (title, topic, author, body, article_img_url)
+                        VALUES ($1, $2, $3, $4, $5) RETURNING *;`;
+        return db.query(queryString, [article.title, article.topic, article.author, article.body, url])
+        .then((data)=>{
+            return data.rows[0];
+        })
+    }
+    return db.query(queryString, [article.title, article.topic, article.author, article.body])
+    .then((data)=>{
+        return data.rows[0];
+    })
+}
+
 function fetchValidArray(qString, prop){
     return db.query(qString)
     .then((data)=>{
@@ -203,4 +224,4 @@ function fetchValidArray(qString, prop){
     })
 }
 
-module.exports = { readTopics, readEndpoints, readArticle, readArticles, readArticleComments, writeArticleComments, addArticleVotes, removeCommentId, readComment, readUsers, readUser, addCommentVotes, writeTopics };
+module.exports = { readTopics, readEndpoints, readArticle, readArticles, readArticleComments, writeArticleComments, addArticleVotes, removeCommentId, readComment, readUsers, readUser, addCommentVotes, writeTopics, writeArticles };
