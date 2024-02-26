@@ -641,8 +641,6 @@ describe('NC NEWS', () => {
             .get("/api/articles?limit=5")
             .expect(200)
             .then((response)=>{
-                console.log(response.body)
-                console.log(response.body.articles['Page 1'])
             })
         });
     });   
