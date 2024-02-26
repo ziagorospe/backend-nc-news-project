@@ -26,5 +26,5 @@ npm run seed
 npm test app
 
 Minimum requirements:
-node: 10.13.0
+node: 21.5.0
 postgres: 8.7.3
