@@ -224,6 +224,25 @@ function removeArticleId(req){
     })
 }
 
+function pagifyObjArr(objArr, p, limit){
+    const pageLimit = limit || 10;
+    const pageOffset = p || 0;
+    const pages = Math.ceil(objArr.length/pageLimit)
+    const pagified = {};
+    let index = 0;
+    for(let i=1; i<=pages;i++){
+        const pageArr = []
+        for(let j=0; j<pageLimit&&index<objArr.length;j++){
+            if (i>pageOffset){
+                pageArr.push(objArr[index]);
+            }
+            index++;
+        }
+        pagified[`Page ${i}`] = pageArr;
+    }
+    return pagified;
+}
+
 function fetchValidArray(qString, prop){
     return db.query(qString)
     .then((data)=>{
@@ -235,4 +254,4 @@ function fetchValidArray(qString, prop){
     })
 }
 
-module.exports = { readTopics, readEndpoints, readArticle, readArticles, readArticleComments, writeArticleComments, addArticleVotes, removeCommentId, readComment, readUsers, readUser, addCommentVotes, writeTopics, writeArticles, removeArticleId };
+module.exports = { readTopics, readEndpoints, readArticle, readArticles, readArticleComments, writeArticleComments, addArticleVotes, removeCommentId, readComment, readUsers, readUser, addCommentVotes, writeTopics, writeArticles, removeArticleId, pagifyObjArr};

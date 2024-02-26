@@ -1,4 +1,4 @@
-const { readTopics, readEndpoints, readArticle, readArticles, readArticleComments, writeArticleComments, addArticleVotes, removeCommentId, readComment, readUsers, readUser, addCommentVotes, writeTopics, writeArticles, removeArticleId } = require(`${__dirname}/../model/model.js`)
+const { readTopics, readEndpoints, readArticle, readArticles, readArticleComments, writeArticleComments, addArticleVotes, removeCommentId, readComment, readUsers, readUser, addCommentVotes, writeTopics, writeArticles, removeArticleId, pagifyObjArr } = require(`${__dirname}/../model/model.js`)
 
 function getTopics(req, res, next){
     readTopics()
@@ -14,9 +14,16 @@ function getTopics(req, res, next){
 function getArticles(req, res, next){
     readArticles(req)
     .then((articles)=>{
+        if(req.query.p || req.query.limit){
+            return pagifyObjArr(articles, req.query.p, req.query.limit)
+        } else {
         res.status(200).send({articles: articles});
+        }
     })
-    .catch(next);
+    .then((pagified)=>{
+        res.status(200).send({articles: pagified});
+    })
+    .catch(next);  
 }
 
 function getArticle(req, res, next){
@@ -62,7 +69,14 @@ function getEndpoints(req, res, next){
 function getArticleComments(req, res, next){
     readArticleComments(req)
     .then((articleComments)=>{
+        if(req.query.p || req.query.limit){
+            return pagifyObjArr(articleComments, req.query.p, req.query.limit)
+        } else {
         res.status(200).send({articleComments: articleComments});
+        }
+    })
+    .then((pagified)=>{
+        res.status(200).send({articleComments: pagified});
     })
     .catch(next);
 }

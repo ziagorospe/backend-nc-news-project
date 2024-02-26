@@ -336,7 +336,7 @@ describe('NC NEWS', () => {
                 expect(body.articles).toBeSortedBy('created_at', {descending: true});
             })
         });
-        test('should reject 400 if given and invalid topic query', () => {
+        test('should reject 404 if given and invalid topic query', () => {
             return request(app)
             .get("/api/articles?topic=87")
             .expect(404)
@@ -352,7 +352,7 @@ describe('NC NEWS', () => {
                 expect(response.body.msg).toBe('topic not found');
             })
         });
-        test('should respond 200 with empty array if given a valid topic that doesnt have any related articles', () => {
+        test('should respond 200 with empty array if given a valid topic that exists that doesnt have any related articles', () => {
             return request(app)
             .get("/api/articles?topic=paper")
             .expect(200)
@@ -632,6 +632,17 @@ describe('NC NEWS', () => {
             .expect(400)
             .then((response)=>{
                 expect(response.body.msg).toBe('bad request');
+            })
+        });
+    });
+    describe('GET /api/articles (pagination)', () => {
+        test('should respond 200 with an articles object with keys of page arrays', () => {
+            return request(app)
+            .get("/api/articles?limit=5")
+            .expect(200)
+            .then((response)=>{
+                console.log(response.body)
+                console.log(response.body.articles['Page 1'])
             })
         });
     });   
